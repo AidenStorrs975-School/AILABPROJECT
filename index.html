@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Twenty-One | Blackjack</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="game.js" defer></script>
+</head>
+<body>
+  <main class="game-shell">
+    <header class="topbar">
+      <a class="wordmark" href="./" aria-label="Twenty-One home">21<span>.</span></a>
+      <div class="topbar-meta">
+        <span class="table-label"><span class="live-dot" aria-hidden="true"></span> SINGLE-DECK TABLE</span>
+        <span class="credits-label">PLAY CREDITS ONLY</span>
+      </div>
+    </header>
+
+    <section class="table" aria-labelledby="game-title">
+      <div class="table-heading">
+        <div>
+          <p class="eyebrow">A CLASSIC CARD GAME</p>
+          <h1 id="game-title">Blackjack<span>.</span></h1>
+        </div>
+        <div class="balance" aria-live="polite">
+          <span class="balance-label">YOUR BANK</span>
+          <span class="balance-amount"><span aria-hidden="true">¢</span><span id="balance">500</span></span>
+        </div>
+      </div>
+
+      <div class="felt" aria-label="Blackjack table">
+        <section class="hand-area dealer-area" aria-labelledby="dealer-title">
+          <div class="hand-heading">
+            <h2 id="dealer-title">Dealer</h2>
+            <span class="hand-total" id="dealer-total">—</span>
+          </div>
+          <div class="cards" id="dealer-cards" aria-label="Dealer's cards"></div>
+        </section>
+
+        <div class="table-center" aria-hidden="true">
+          <span class="table-rule"></span>
+          <span class="table-mark">21</span>
+          <span class="table-rule"></span>
+        </div>
+
+        <section class="hand-area player-area" aria-labelledby="player-title">
+          <div class="hand-heading">
+            <h2 id="player-title">You</h2>
+            <span class="hand-total" id="player-total">—</span>
+          </div>
+          <div class="cards" id="player-cards" aria-label="Your cards"></div>
+        </section>
+
+        <p class="round-message" id="round-message" role="status" aria-live="polite">Choose your bet, then deal in.</p>
+      </div>
+
+      <section class="controls" aria-label="Game controls">
+        <div class="bet-control">
+          <label for="bet">Your bet</label>
+          <div class="bet-input-wrap">
+            <span aria-hidden="true">¢</span>
+            <input id="bet" name="bet" type="number" min="10" max="500" step="10" value="10" inputmode="numeric" autocomplete="off">
+          </div>
+          <span class="bet-hint">10 credit minimum</span>
+        </div>
+        <div class="action-controls">
+          <button class="button button-secondary" id="hit" type="button" disabled>Hit</button>
+          <button class="button button-secondary" id="stand" type="button" disabled>Stand</button>
+          <button class="button button-secondary" id="double" type="button" disabled>Double</button>
+          <button class="button button-primary" id="deal" type="button">Deal cards</button>
+        </div>
+      </section>
+
+      <footer class="table-footer">
+        <span>Blackjack pays 3:2</span>
+        <span>Dealer stands on soft 17</span>
+        <span>One standard deck</span>
+      </footer>
+    </section>
+
+    <footer class="page-footer">
+      <span>JUST FOR FUN. NO PURCHASE OR CASH VALUE.</span>
+      <span>Cards shuffled with your browser's secure random generator.</span>
+    </footer>
+  </main>
+</body>
+</html>
