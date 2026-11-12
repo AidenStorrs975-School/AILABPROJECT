@@ -22,7 +22,7 @@ const MIN_BET = 10;
 const BET_STEP = 10;
 const INITIAL_BANKROLL = 500;
 // These timings keep the opening cards spaced apart while leaving time for each card's CSS animation.
-const DEAL_STAGGER_MS = 360;
+const DEAL_STAGGER_MS = 500;
 const CARD_ANIMATION_DURATION_MS = 220;
 const BANKROLL_STORAGE_KEY = 'twenty-one-bankroll';
 const UINT32_RANGE = 0x100000000;
@@ -285,11 +285,6 @@ function dealRound() {
   message = 'Dealing your cards...';
   render();
 
-  const prefersReducedMotion = typeof window.matchMedia === 'function'
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const dealDuration = prefersReducedMotion
-    ? 0
-    : DEAL_STAGGER_MS * 3 + CARD_ANIMATION_DURATION_MS;
   window.setTimeout(() => {
     phase = 'player';
     const playerNatural = isNatural(playerHand);
@@ -307,7 +302,7 @@ function dealRound() {
 
     message = 'Your move. Hit, stand, or double your bet.';
     render(false);
-  }, dealDuration);
+  }, DEAL_STAGGER_MS * 3 + CARD_ANIMATION_DURATION_MS);
 }
 
 // A hit gives the player one card; going over 21 is a bust and ends the round.
