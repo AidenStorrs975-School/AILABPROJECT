@@ -184,7 +184,10 @@ function renderHand(container, hand, hideHoleCard = false, dealOrderOffset = nul
 // renderCards can be false to update the controls after dealing without replaying the card animations.
 function render(renderCards = true) {
   const isDealing = phase === 'dealing';
-  const hideHoleCard = phase === 'player' || isDealing;
+  const isDrawing = phase === 'player-dealing';
+  const dealerTurn = phase === 'dealer';
+  const roundInProgress = phase === 'player' || isDealing || isDrawing || dealerTurn;
+  const hideHoleCard = phase === 'player' || isDealing || isDrawing;
   if (renderCards) {
     renderHand(elements.playerCards, playerHand, false, isDealing ? 1 : null);
     renderHand(elements.dealerCards, dealerHand, hideHoleCard, isDealing ? 0 : null);
@@ -201,13 +204,16 @@ function render(renderCards = true) {
   elements.hit.disabled = !roundActive;
   elements.stand.disabled = !roundActive;
   elements.double.disabled = !roundActive || playerHand.length !== 2 || bankroll < wager;
-  elements.deal.disabled = roundActive || isDealing || bankroll < MIN_BET || rngUnavailable;
-  elements.deal.textContent = isDealing ? 'Dealing cards...' : roundActive ? 'Round in progress' : phase === 'ready' ? 'Deal cards' : 'Deal again';
-  elements.bet.disabled = roundActive || isDealing || bankroll < MIN_BET;
+  elements.deal.disabled = roundInProgress || bankroll < MIN_BET || rngUnavailable;
+  elements.deal.textContent = isDealing || isDrawing
+    ? 'Dealing cards...'
+    : dealerTurn ? 'Dealer playing...'
+      : roundActive ? 'Round in progress' : phase === 'ready' ? 'Deal cards' : 'Deal again';
+  elements.bet.disabled = roundInProgress || bankroll < MIN_BET;
 
   const maximumBet = Math.max(MIN_BET, Math.floor(bankroll / BET_STEP) * BET_STEP);
   elements.bet.max = String(maximumBet);
-  if (!roundActive && !isDealing) {
+  if (!roundInProgress) {
     const currentBet = Number(elements.bet.value);
     const displayBet = Number.isSafeInteger(currentBet) && currentBet >= MIN_BET
       ? Math.min(currentBet, maximumBet)
@@ -235,20 +241,46 @@ function settle(outcome, renderCards = true) {
   render(renderCards);
 }
 
-// Play the dealer's turn (drawing until 17 or more), then compare the two hand totals.
-function resolveDealerTurn() {
-  while (handValue(dealerHand) < 17) {
-    draw(dealerHand);
-  }
-
+// Compare the finished hands and settle the round without redrawing the cards already shown.
+function settleDealerTurn() {
   const playerTotal = handValue(playerHand);
   const dealerTotal = handValue(dealerHand);
   if (dealerTotal > 21 || playerTotal > dealerTotal) {
-    settle('win');
+    settle('win', false);
   } else if (playerTotal === dealerTotal) {
-    settle('push');
+    settle('push', false);
   } else {
-    settle('loss');
+    settle('loss', false);
+  }
+}
+
+// Draw one dealer card at a time, waiting between cards so each one can be seen.
+function dealDealerCard() {
+  draw(dealerHand);
+  elements.dealerCards.append(createCard(dealerHand[dealerHand.length - 1]));
+  render(false);
+
+  if (handValue(dealerHand) < 17) {
+    window.setTimeout(dealDealerCard, DEAL_STAGGER_MS);
+  } else {
+    window.setTimeout(settleDealerTurn, CARD_ANIMATION_DURATION_MS);
+  }
+}
+
+// Reveal the dealer's hidden card, then continue with one visible card at a time.
+function resolveDealerTurn() {
+  phase = 'dealer';
+  message = 'Dealer is playing...';
+  const hiddenCard = elements.dealerCards.children[1];
+  if (hiddenCard) {
+    elements.dealerCards.replaceChild(createCard(dealerHand[1]), hiddenCard);
+  }
+  render(false);
+
+  if (handValue(dealerHand) < 17) {
+    window.setTimeout(dealDealerCard, DEAL_STAGGER_MS);
+  } else {
+    window.setTimeout(settleDealerTurn, CARD_ANIMATION_DURATION_MS);
   }
 }
 
@@ -309,13 +341,21 @@ function dealRound() {
 function hit() {
   if (phase !== 'player') return;
   draw(playerHand);
-  if (handValue(playerHand) > 21) {
-    settle('bust');
-  } else if (handValue(playerHand) === 21) {
-    resolveDealerTurn();
-  } else {
-    render();
-  }
+  elements.playerCards.append(createCard(playerHand[playerHand.length - 1]));
+  phase = 'player-dealing';
+  message = 'Your card is being dealt...';
+  render(false);
+  window.setTimeout(() => {
+    phase = 'player';
+    if (handValue(playerHand) > 21) {
+      settle('bust', false);
+    } else if (handValue(playerHand) === 21) {
+      resolveDealerTurn();
+    } else {
+      message = 'Your move. Hit, stand, or double your bet.';
+      render(false);
+    }
+  }, CARD_ANIMATION_DURATION_MS);
 }
 
 // Standing ends the player's turn and lets the dealer play.
@@ -330,11 +370,18 @@ function doubleDown() {
   bankroll -= wager;
   wager *= 2;
   draw(playerHand);
-  if (handValue(playerHand) > 21) {
-    settle('bust');
-  } else {
-    resolveDealerTurn();
-  }
+  elements.playerCards.append(createCard(playerHand[playerHand.length - 1]));
+  phase = 'player-dealing';
+  message = 'Your card is being dealt...';
+  render(false);
+  window.setTimeout(() => {
+    phase = 'player';
+    if (handValue(playerHand) > 21) {
+      settle('bust', false);
+    } else {
+      resolveDealerTurn();
+    }
+  }, CARD_ANIMATION_DURATION_MS);
 }
 
 // An event listener is a function that runs when a user action happens, such as clicking a button.
