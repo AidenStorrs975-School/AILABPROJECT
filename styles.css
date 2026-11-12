@@ -1,3 +1,5 @@
+/* CSS (Cascading Style Sheets) controls how the HTML page looks. A selector is the part before { that chooses elements; a declaration is a setting inside { }, written as property: value. */
+/* These custom properties (reusable named values) hold colors and font choices for the rest of the stylesheet. */
 :root {
   color-scheme: dark;
   --ink: #f3f0e5;
@@ -14,8 +16,10 @@
   --serif: Georgia, serif;
 }
 
+/* Apply consistent sizing and typography defaults across the page. */
 * { box-sizing: border-box; }
 
+/* Set the page's base size, colors, background, and font. */
 body {
   min-width: 320px;
   min-height: 100vh;
@@ -27,9 +31,11 @@ body {
   font-family: var(--sans);
 }
 
+/* Make form controls use the page font and give keyboard-focused controls a visible outline. */
 button, input { font: inherit; }
 button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
+/* Header and page-width rules keep the logo and table aligned. */
 .game-shell { width: min(100% - 48px, 1060px); margin: 0 auto; }
 .topbar { height: 82px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
 .wordmark { color: var(--ink); font: 600 26px var(--serif); text-decoration: none; }
@@ -38,6 +44,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
 .live-dot { display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: #8bc28b; box-shadow: 0 0 12px rgba(139, 194, 139, 0.5); }
 .credits-label { color: var(--gold); }
 
+/* Style the game title, balance, and small descriptive labels. */
 .table { padding-top: 40px; }
 .table-heading { display: flex; align-items: end; justify-content: space-between; margin: 0 4px 24px; }
 .eyebrow, .balance-label { margin: 0 0 8px; color: var(--muted); font: 10px var(--mono); letter-spacing: 1.3px; }
@@ -47,6 +54,7 @@ h1 { margin: 0; font: 500 42px/1.05 var(--serif); }
 .balance-amount { font: 500 24px var(--mono); color: var(--gold); }
 .balance-amount > span:first-child { font-size: 15px; }
 
+/* The felt styles the card table, including its layered green background and inner border. */
 .felt {
   position: relative;
   min-height: 510px;
@@ -60,7 +68,9 @@ h1 { margin: 0; font: 500 42px/1.05 var(--serif); }
     linear-gradient(140deg, var(--felt-light), var(--felt) 45%, var(--felt-dark));
   box-shadow: 0 20px 70px rgba(0, 0, 0, 0.28), inset 0 0 90px rgba(5, 28, 19, 0.24);
 }
+/* A pseudo-element is a decorative shape CSS adds without extra HTML; this one draws the inner table border. */
 .felt::before { position: absolute; inset: 14px; border: 1px solid rgba(236, 224, 184, 0.15); border-radius: 48% / 22%; content: ''; pointer-events: none; }
+/* Hand headings, totals, and card containers arrange each side of the game. */
 .hand-area { position: relative; z-index: 1; }
 .hand-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 13px; }
 .hand-heading h2 { margin: 0; color: rgba(246, 245, 229, 0.88); font: 500 15px var(--sans); }
@@ -89,6 +99,7 @@ h1 { margin: 0; font: 500 42px/1.05 var(--serif); }
 .card-corner-bottom { top: auto; right: 6px; bottom: 5px; left: auto; transform: rotate(180deg); }
 .playing-card.face-down { border-color: #e1cc91; background: repeating-linear-gradient(45deg, #a64640 0 4px, #f0dfb6 4px 6px, #a64640 6px 10px); }
 .playing-card.face-down::after { width: 32px; height: 51px; border: 1px solid rgba(255,255,255,.62); border-radius: 2px; content: ''; }
+/* Reserve space for each hand and center the decorative divider and round message. */
 .dealer-area { min-height: 163px; }
 .player-area { min-height: 145px; }
 .table-center { display: flex; align-items: center; justify-content: center; gap: 14px; height: 42px; opacity: .63; }
@@ -96,6 +107,7 @@ h1 { margin: 0; font: 500 42px/1.05 var(--serif); }
 .table-mark { color: rgba(236, 224, 184, 0.78); font: 12px var(--serif); }
 .round-message { position: absolute; z-index: 2; right: 20px; bottom: 19px; left: 20px; min-height: 18px; margin: 0; color: #e4d7b6; text-align: center; font: 12px var(--mono); }
 
+/* Arrange the bet input and action buttons below the card table. */
 .controls { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 21px 4px 19px; border-bottom: 1px solid var(--line); }
 .bet-control { display: grid; grid-template-columns: auto auto; align-items: center; column-gap: 12px; }
 .bet-control label { grid-column: 1 / -1; margin-bottom: 7px; color: var(--muted); font-size: 12px; }
@@ -111,12 +123,15 @@ h1 { margin: 0; font: 500 42px/1.05 var(--serif); }
 .button-secondary:not(:disabled):hover { border-color: var(--gold); color: var(--gold); }
 .button-primary { min-width: 118px; color: #1b261e; background: var(--gold); }
 .button-primary:not(:disabled):hover { background: #efd18d; }
+/* Show rule notes and the playful-use disclaimer beneath the controls. */
 .table-footer { display: flex; justify-content: space-between; gap: 10px; padding: 13px 4px 0; color: #859389; font: 9px var(--mono); letter-spacing: .2px; }
 .page-footer { display: flex; justify-content: space-between; gap: 16px; padding: 30px 4px; color: #708077; font: 9px var(--mono); letter-spacing: .35px; }
 
+/* An animation changes an element's appearance over time; this one moves a new card into place. Reduced-motion settings make it almost instant for people who prefer less movement. */
 @keyframes card-in { from { opacity: 0; transform: translateY(8px) rotate(1deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
 
+/* A media query applies different layout rules when the screen is narrow, such as on a phone. */
 @media (max-width: 680px) {
   .game-shell { width: min(100% - 28px, 500px); }
   .topbar { height: 65px; }
@@ -142,6 +157,7 @@ h1 { margin: 0; font: 500 42px/1.05 var(--serif); }
   .page-footer { flex-direction: column; padding: 23px 4px; line-height: 1.7; }
 }
 
+/* Adjust a few more details for especially narrow phone screens. */
 @media (max-width: 390px) {
   .topbar-meta { gap: 9px; }
   .table-label { font-size: 7px; }

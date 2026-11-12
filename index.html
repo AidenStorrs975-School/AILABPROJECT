@@ -1,17 +1,30 @@
+<!-- HTML (HyperText Markup Language) is the markup that gives the page its structure. An element is one page building block, marked by tags such as <body>. -->
+<!-- This doctype declaration tells the browser to use modern HTML rules. -->
 <!doctype html>
+<!-- An attribute is a setting inside an HTML tag; lang tells browsers and assistive tools that the page is in English. -->
 <html lang="en">
 <head>
+  <!-- Character encoding maps stored text data to displayed letters and symbols. -->
   <meta charset="utf-8">
+  <!-- The viewport is the visible part of the page; this setting makes it fit phones and other screens. -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Referrer information (the page address you came from) is not sent when this page follows a link. -->
   <meta name="referrer" content="no-referrer">
+  <!-- A Content Security Policy (CSP) is a browser rule list that limits where page resources can come from. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <!-- The title appears in the browser tab. -->
   <title>Twenty-One | Blackjack</title>
+  <!-- A stylesheet is a separate CSS file that controls the page's appearance. -->
   <link rel="stylesheet" href="styles.css">
+  <!-- The defer setting runs this JavaScript after the browser has read the page elements. -->
   <script src="game.js" defer></script>
 </head>
 <body>
+  <!-- The main element wraps the central content of the page. -->
   <main class="game-shell">
+    <!-- The header contains the site name and short table labels. -->
     <header class="topbar">
+      <!-- ARIA (Accessible Rich Internet Applications) attributes give assistive tools extra names and status information. -->
       <a class="wordmark" href="./" aria-label="Twenty-One home">21<span>.</span></a>
       <div class="topbar-meta">
         <span class="table-label"><span class="live-dot" aria-hidden="true"></span> SINGLE-DECK TABLE</span>
@@ -19,7 +32,9 @@
       </div>
     </header>
 
+    <!-- This section contains the game title, table, controls, and game-rule notes. -->
     <section class="table" aria-labelledby="game-title">
+      <!-- The heading introduces the game and shows the player's current credit balance. -->
       <div class="table-heading">
         <div>
           <p class="eyebrow">A CLASSIC CARD GAME</p>
@@ -31,7 +46,9 @@
         </div>
       </div>
 
+      <!-- The felt is the visual card table; its sections hold the dealer's and player's hands. -->
       <div class="felt" aria-label="Blackjack table">
+        <!-- The dealer area displays the dealer's cards and total. -->
         <section class="hand-area dealer-area" aria-labelledby="dealer-title">
           <div class="hand-heading">
             <h2 id="dealer-title">Dealer</h2>
@@ -40,12 +57,14 @@
           <div class="cards" id="dealer-cards" aria-label="Dealer's cards"></div>
         </section>
 
+        <!-- These decorative marks divide the two hands and are hidden from assistive tools. -->
         <div class="table-center" aria-hidden="true">
           <span class="table-rule"></span>
           <span class="table-mark">21</span>
           <span class="table-rule"></span>
         </div>
 
+        <!-- The player area displays your cards and total. -->
         <section class="hand-area player-area" aria-labelledby="player-title">
           <div class="hand-heading">
             <h2 id="player-title">You</h2>
@@ -54,10 +73,13 @@
           <div class="cards" id="player-cards" aria-label="Your cards"></div>
         </section>
 
+        <!-- A live status message is updated by JavaScript as the round progresses. -->
         <p class="round-message" id="round-message" role="status" aria-live="polite">Choose your bet, then deal in.</p>
       </div>
 
+      <!-- These controls let you set your bet and choose what to do during a round. -->
       <section class="controls" aria-label="Game controls">
+        <!-- The number input accepts the amount of play credits to bet. -->
         <div class="bet-control">
           <label for="bet">Your bet</label>
           <div class="bet-input-wrap">
@@ -66,6 +88,7 @@
           </div>
           <span class="bet-hint">10 credit minimum</span>
         </div>
+        <!-- JavaScript enables or disables these buttons depending on the game state. -->
         <div class="action-controls">
           <button class="button button-secondary" id="hit" type="button" disabled>Hit</button>
           <button class="button button-secondary" id="stand" type="button" disabled>Stand</button>
@@ -74,6 +97,7 @@
         </div>
       </section>
 
+      <!-- These notes summarize the rules: 3:2 means 1.5 times the bet in blackjack winnings; soft 17 means 17 points with an ace counted as 11. -->
       <footer class="table-footer">
         <span>Blackjack pays 3:2</span>
         <span>Dealer stands on soft 17</span>
@@ -81,6 +105,7 @@
       </footer>
     </section>
 
+    <!-- The page footer clarifies that credits have no cash value and notes how cards are shuffled. -->
     <footer class="page-footer">
       <span>JUST FOR FUN. NO PURCHASE OR CASH VALUE.</span>
       <span>Cards shuffled with your browser's secure random generator.</span>
