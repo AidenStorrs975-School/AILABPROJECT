@@ -91,6 +91,11 @@ h1 { margin: 0; font: 500 42px/1.05 var(--serif); }
   box-shadow: 0 4px 9px rgba(0,0,0,.2);
   animation: card-in 220ms ease-out both;
 }
+/* These classes stagger only the four opening cards, in dealer/player dealing order. */
+.playing-card.deal-step-0 { animation-delay: 0ms; }
+.playing-card.deal-step-1 { animation-delay: 360ms; }
+.playing-card.deal-step-2 { animation-delay: 720ms; }
+.playing-card.deal-step-3 { animation-delay: 1080ms; }
 .playing-card:first-child { margin-left: 0; }
 .playing-card.red { color: var(--red); }
 .card-face { display: grid; justify-items: center; font: 600 34px/1 var(--serif); }
@@ -129,7 +134,7 @@ h1 { margin: 0; font: 500 42px/1.05 var(--serif); }
 
 /* An animation changes an element's appearance over time; this one moves a new card into place. Reduced-motion settings make it almost instant for people who prefer less movement. */
 @keyframes card-in { from { opacity: 0; transform: translateY(8px) rotate(1deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } .playing-card.deal-step-0, .playing-card.deal-step-1, .playing-card.deal-step-2, .playing-card.deal-step-3 { animation-delay: 0ms !important; } }
 
 /* A media query applies different layout rules when the screen is narrow, such as on a phone. */
 @media (max-width: 680px) {

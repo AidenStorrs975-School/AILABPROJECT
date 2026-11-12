@@ -21,6 +21,9 @@ const RANKS = [
 const MIN_BET = 10;
 const BET_STEP = 10;
 const INITIAL_BANKROLL = 500;
+// These timings keep the opening cards spaced apart while leaving time for each card's CSS animation.
+const DEAL_STAGGER_MS = 360;
+const CARD_ANIMATION_DURATION_MS = 220;
 const BANKROLL_STORAGE_KEY = 'twenty-one-bankroll';
 const UINT32_RANGE = 0x100000000;
 
@@ -165,22 +168,31 @@ function createCard(card, hidden = false) {
 }
 
 // Clear a hand's old card elements and draw its current cards into the page.
-function renderHand(container, hand, hideHoleCard = false) {
+// dealOrderOffset spaces only the opening cards; null keeps later redraws together.
+function renderHand(container, hand, hideHoleCard = false, dealOrderOffset = null) {
   container.replaceChildren();
   hand.forEach((card, index) => {
-    container.append(createCard(card, hideHoleCard && index === 1));
+    const cardElement = createCard(card, hideHoleCard && index === 1);
+    if (dealOrderOffset !== null) {
+      cardElement.classList.add(`deal-step-${dealOrderOffset + index * 2}`);
+    }
+    container.append(cardElement);
   });
 }
 
 // Refresh the visible cards, totals, message, and enabled/disabled controls from the game state.
-function render() {
-  const hideHoleCard = phase === 'player';
-  renderHand(elements.playerCards, playerHand);
-  renderHand(elements.dealerCards, dealerHand, hideHoleCard);
+// renderCards can be false to update the controls after dealing without replaying the card animations.
+function render(renderCards = true) {
+  const isDealing = phase === 'dealing';
+  const hideHoleCard = phase === 'player' || isDealing;
+  if (renderCards) {
+    renderHand(elements.playerCards, playerHand, false, isDealing ? 1 : null);
+    renderHand(elements.dealerCards, dealerHand, hideHoleCard, isDealing ? 0 : null);
+  }
 
   elements.balance.textContent = String(bankroll);
-  elements.playerTotal.textContent = playerHand.length ? String(handValue(playerHand)) : '—';
-  elements.dealerTotal.textContent = hideHoleCard
+  elements.playerTotal.textContent = isDealing ? '—' : playerHand.length ? String(handValue(playerHand)) : '—';
+  elements.dealerTotal.textContent = isDealing ? '—' : hideHoleCard
     ? String(dealerHand[0] ? handValue([dealerHand[0]]) : '—')
     : dealerHand.length ? String(handValue(dealerHand)) : '—';
   elements.message.textContent = message;
@@ -189,13 +201,13 @@ function render() {
   elements.hit.disabled = !roundActive;
   elements.stand.disabled = !roundActive;
   elements.double.disabled = !roundActive || playerHand.length !== 2 || bankroll < wager;
-  elements.deal.disabled = roundActive || bankroll < MIN_BET || rngUnavailable;
-  elements.deal.textContent = roundActive ? 'Round in progress' : phase === 'ready' ? 'Deal cards' : 'Deal again';
-  elements.bet.disabled = roundActive || bankroll < MIN_BET;
+  elements.deal.disabled = roundActive || isDealing || bankroll < MIN_BET || rngUnavailable;
+  elements.deal.textContent = isDealing ? 'Dealing cards...' : roundActive ? 'Round in progress' : phase === 'ready' ? 'Deal cards' : 'Deal again';
+  elements.bet.disabled = roundActive || isDealing || bankroll < MIN_BET;
 
   const maximumBet = Math.max(MIN_BET, Math.floor(bankroll / BET_STEP) * BET_STEP);
   elements.bet.max = String(maximumBet);
-  if (!roundActive) {
+  if (!roundActive && !isDealing) {
     const currentBet = Number(elements.bet.value);
     const displayBet = Number.isSafeInteger(currentBet) && currentBet >= MIN_BET
       ? Math.min(currentBet, maximumBet)
@@ -205,7 +217,7 @@ function render() {
 }
 
 // Finish the round, award any winnings, update the message, save the balance, and refresh the page.
-function settle(outcome) {
+function settle(outcome, renderCards = true) {
   phase = 'over';
   if (outcome === 'blackjack') {
     bankroll += wager * 2.5;
@@ -220,7 +232,7 @@ function settle(outcome) {
     message = outcome === 'bust' ? 'Bust. Dealer wins.' : 'Dealer wins this round.';
   }
   saveBankroll();
-  render();
+  render(renderCards);
 }
 
 // Play the dealer's turn (drawing until 17 or more), then compare the two hand totals.
@@ -240,9 +252,9 @@ function resolveDealerTurn() {
   }
 }
 
-// Start a round after checking the bet; the player and dealer each receive two cards.
+// Start a round after checking the bet; the player and dealer each receive two cards, shown one at a time.
 function dealRound() {
-  if (phase === 'player') return;
+  if (phase === 'player' || phase === 'dealing') return;
   const requestedBet = Number(elements.bet.value);
   if (!Number.isSafeInteger(requestedBet) || requestedBet < MIN_BET
       || requestedBet % BET_STEP !== 0 || requestedBet > bankroll) {
@@ -269,22 +281,33 @@ function dealRound() {
   draw(dealerHand);
   draw(playerHand);
   draw(dealerHand);
-  phase = 'player';
-  message = 'Your move. Hit, stand, or double your bet.';
-
-  const playerNatural = isNatural(playerHand);
-  const dealerNatural = isNatural(dealerHand);
-  if (playerNatural || dealerNatural) {
-    if (playerNatural && dealerNatural) {
-      settle('push');
-    } else if (playerNatural) {
-      settle('blackjack');
-    } else {
-      settle('loss');
-    }
-    return;
-  }
+  phase = 'dealing';
+  message = 'Dealing your cards...';
   render();
+
+  const prefersReducedMotion = typeof window.matchMedia === 'function'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dealDuration = prefersReducedMotion
+    ? 0
+    : DEAL_STAGGER_MS * 3 + CARD_ANIMATION_DURATION_MS;
+  window.setTimeout(() => {
+    phase = 'player';
+    const playerNatural = isNatural(playerHand);
+    const dealerNatural = isNatural(dealerHand);
+    if (playerNatural || dealerNatural) {
+      if (playerNatural && dealerNatural) {
+        settle('push', false);
+      } else if (playerNatural) {
+        settle('blackjack', false);
+      } else {
+        settle('loss', false);
+      }
+      return;
+    }
+
+    message = 'Your move. Hit, stand, or double your bet.';
+    render(false);
+  }, dealDuration);
 }
 
 // A hit gives the player one card; going over 21 is a bust and ends the round.
